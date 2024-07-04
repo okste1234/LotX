@@ -1,11 +1,12 @@
-import Image from "next/image";
+import Hero from "@/components/Home/Hero";
+import MaxWrapper from "@/components/shared/MaxWrapper";
 
 export default function Home() {
   return (
-    <main className="">
-      <div className="">
-       
-      </div>
+    <main className="w-full min-h-screen bg-gray-950" id="heroPattern">
+      <MaxWrapper>
+        <Hero />
+     </MaxWrapper>
     </main>
   );
 }
