@@ -3,14 +3,26 @@ import MaxWrapper from '../shared/MaxWrapper'
 import Link from 'next/link'
 import { Box } from '@chakra-ui/react'
 import { MdOutlineSecurity } from 'react-icons/md'
+import { FaEthereum } from 'react-icons/fa6'
+import { SiEthereum } from 'react-icons/si'
+import { RiHandCoinFill } from 'react-icons/ri'
+import { BsCashCoin } from 'react-icons/bs'
 
 const Hero = () => {
   return (
       <main className="w-full overflow-hidden lg:h-[80vh] md:h-[50vh] h-screen flex items-center md:flex-row flex-col">
-            <div className="flex-1 h-1/2 md:h-full flex order-2 md:order-1 flex-col gap-5 items-start justify-center lg:px-12 md:px-6 px-4">
-                <h1 className="lg:text-7xl text-4xl font-belanosima font-medium text-gray-200">Win Big with Just 0.000015 ETH! on<br /> <span className="bg-gradient-to-r from-sky-400 to-emerald-400 text-transparent bg-clip-text">LotX</span></h1>
+            <div className="flex-1 h-1/2 md:h-full flex order-2 md:order-1 flex-col gap-4 md:gap-6 items-start justify-center lg:px-12 md:px-6 px-4">
+                <h1 className="lg:text-7xl text-4xl font-belanosima font-medium text-gray-200"><span className='bg-gradient-to-l from-sky-400 to-emerald-400 text-transparent bg-clip-text'>Win Big </span>with Just 0.000015 ETH! on<br /> <span className="bg-gradient-to-r from-sky-400 to-emerald-400 text-transparent bg-clip-text">LotX</span></h1>
                 <p className="text-xl font-barlow text-gray-400">Experience the thrill of playing the lottery with our secured app. Check your numbers, claim your prizes, and stay up-to-date with the latest jackpot information.</p>
-                <Link href="/" className="text-gray-100 text-sm font-barlow px-4 py-2 flex justify-center items-center gap-1 bg-sky-600 hover:bg-emerald-500">Start Playing Now</Link>
+                <div className='flex items-center gap-4'>
+                  <Link href="/" className="text-gray-100 text-sm font-barlow px-4 py-2 flex justify-center items-center    gap-1 bg-sky-600 hover:bg-emerald-500">
+                      Play Now
+                  </Link>
+                  <Link href="/" className="text-gray-100 text-sm font-barlow px-4 py-2 flex justify-center items-center gap-1 hover:bg-sky-600 bg-emerald-500">
+                      How to Play
+                  </Link>
+                </div>
+                
             </div>
             <div className="flex-1  h-1/2 md:h-full order-1 md:order-2 relative flex items-end justify-end flex-col before:absolute before:top-0 before:left-0 before:w-full before:h-full before:bg-gradient-to-l before:from-gray-950/30 before:to-transparent after:absolute after:bottom-0 after:right-0 after:w-full after:h-full after:bg-gradient-to-b after:from-gray-950 after:to-transparent">
                 <div className="lg:w-[600px] animate-spin lg:h-[600px] w-[500px] h-[500px] rounded-full bg-gradient-to-t from-sky-400 to-emerald-400 flex justify-center items-center -mr-28 md:-mt-28 -mt-40">
@@ -32,9 +44,9 @@ const Hero = () => {
 
 
                 <div className="absolute md:bottom-28 bottom-16 md:right-28 right-12 z-20 flex items-center gap-2 animate-pulse" >
-                    <span className="text-gray-200 text-sm font-belanosima">Optimized</span>
+                    <span className="text-gray-200 text-sm font-belanosima">Easy Payments</span>
                     <span className="w-8 h-8 rounded-full bg-gray-800 flex justify-center items-center text-emerald-400 text-xl">
-                        <MdOutlineSecurity />
+                        <FaEthereum />
                     </span>
                 </div>
 
@@ -42,23 +54,23 @@ const Hero = () => {
                 <div className="absolute md:bottom-24 bottom-6 md:left-12 left-6 z-20 flex items-center gap-2 animate-pulse">
                     <span className="text-gray-200 text-sm font-belanosima">Tested</span>
                     <span className="w-8 h-8 rounded-full bg-gray-800 flex justify-center items-center text-emerald-400 text-xl">
-                        <MdOutlineSecurity />
+                        <RiHandCoinFill />
                     </span>
                 </div>
 
 
                 <div className="absolute animate-pulse top-20 left-16 z-20 flex items-center gap-2" >
-                    <span className="text-gray-200 text-sm font-belanosima">Secure & Safe</span>
+                    <span className="text-gray-200 text-sm font-belanosima">Massive Rewards</span>
                     <span className="w-8 h-8 rounded-full bg-gray-800 flex justify-center items-center text-emerald-400 text-xl">
-                        <MdOutlineSecurity />
+                        <SiEthereum />
                     </span>
                 </div>
 
 
                 <div className="absolute top-1/2 md:right-1/2 right-[40%] z-20 flex items-center gap-2 animate-bounce" >
-                    <span className="text-gray-200 text-sm font-belanosima">Automatic</span>
+                    <span className="text-gray-200 text-sm font-belanosima">Automated Cashout</span>
                     <span className="w-8 h-8 rounded-full bg-gray-800 flex justify-center items-center text-emerald-400 text-xl">
-                        <MdOutlineSecurity />
+                        <BsCashCoin />
                     </span>
                 </div>
             </div>

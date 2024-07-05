@@ -4,6 +4,7 @@ import "./globals.css";
 import { ChProviders } from "@/components/context/ChakraProvider";
 import { AppProvider } from "@/components/context/AppContext";
 import NavBar from "@/components/shared/NavBar";
+import Footer from "@/components/shared/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,6 +26,9 @@ export default function RootLayout({
           <ChProviders>
             <NavBar />
             {children}
+            <div id="heroPattern">
+            <Footer />
+            </div>
             </ChProviders>
           </AppProvider>
       </body>
