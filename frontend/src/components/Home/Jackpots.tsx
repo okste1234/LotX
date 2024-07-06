@@ -1,5 +1,6 @@
 "use client"
 import { Button } from "@chakra-ui/react"
+import Link from "next/link"
 import { useState } from "react"
 import { CiEdit } from "react-icons/ci"
 import { LuSettings2 } from "react-icons/lu"
@@ -43,7 +44,7 @@ const Jackpots = () => {
             <div className="w-full  grid lg:grid-cols-3 md:grid-cols-2 gap-10 mt-12 mb-12">
                 {
                     steps.map(({ caption, text, icon }, index) => (
-                        <div className={`flex flex-col bg-gray-900 px-3 py-2 items-center gap-4 overflow-hidden relative cursor-pointer`} key={index}>
+                        <div className={`flex flex-col bg-gray-900 px-3 py-3 items-center gap-4 overflow-hidden relative cursor-pointer`} id="pots" key={index}>
                             <div className="  absolute -top-10 -left-7 w-[70px] h-[100px] bg-gray-300 rotate-45 flex justify-end items-center pr-4">
                                 <h1 className="-rotate-45 text-2xl text-gray-900 font-barlow">{index + 1}</h1>
                             </div>
@@ -53,9 +54,13 @@ const Jackpots = () => {
                             <h3 className="text-xl text-gray-200 font-belanosima">{caption}</h3>
                             <p className="text-gray-400 font-barlow">{text}</p>
                             {!status? 
-                                <Button>
-                                    Play Now
-                                </Button>
+                                
+                                <Link href={"/pots"}>
+                                    <Button>
+                                        Play Now
+                                    </Button>
+                                </Link>
+                               
                                 :
                                 <Button colorScheme='teal' variant='outline' disabled cursor={"none"}>
                                     Ended

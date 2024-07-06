@@ -1,6 +1,5 @@
 "use client"
 import { useEffect, useState, useCallback } from "react";
-import { SiStreamrunners } from "react-icons/si";
 import { HiOutlineMenuAlt3 } from "react-icons/hi";
 import { LuLogIn } from "react-icons/lu";
 import { IoCloseOutline } from "react-icons/io5";
@@ -8,14 +7,12 @@ import { Link as Spy } from 'react-scroll';
 import { useWalletInfo, useWeb3Modal, useWeb3ModalAccount } from '@web3modal/ethers/react'
 import { NavLinks } from "../cms/NavLinks";
 import Link from "next/link";
-import { useRouter } from 'next/navigation'
 import { WalletConnected } from "@/utils/WalletConnected";
-import MaxWrapper from "./MaxWrapper";
  
 const NavBar = () => {
-    const { open } = useWeb3Modal()
     const { address, isConnected } = useWeb3ModalAccount()
     const { walletInfo } = useWalletInfo()
+    const { open } = useWeb3Modal()
 
     const [openMenu, setOpenMenu] = useState<boolean>(false);
 
@@ -35,17 +32,7 @@ const NavBar = () => {
     }, [openMenu]);
 
 
-    const router = useRouter();
-
-    const change = useCallback(async () => {
-        if (isConnected) {
-            router.push("/signup");
-        }
-    }, [isConnected, router]);
-
-    useEffect(() => {
-        change();
-    }, [change, isConnected]);
+ 
 
     return (
        <header className="w-full bg-gray-950 flex justify-between items-center py-6 md:px-8 px-3 overflow-hidden">
@@ -65,18 +52,24 @@ const NavBar = () => {
             </ul>
 
             <aside className="flex items-center lg:gap-6 gap-2">
-                <select className="border-none hidden md:inline-block text-sm outline-none bg-transparent text-gray-200 font-barlow">
-                    <option value="EN" selected>EN</option>
+                <select defaultValue={"EN"} className="border-none hidden md:inline-block text-sm outline-none bg-gray-950 text-gray-200 font-barlow">
+                    <option value="EN">EN</option>
                     <option value="ITA">ITA</option>
                     <option value="FRA">FRA</option>
                 </select>
 
-                <button onClick={() => open()} className="text-gray-200 text-sm font-barlow px-4 py-2 flex justify-center items-center gap-1 bg-sky-600 hover:bg-emerald-500 font-grotesk">
+                <button className="text-gray-200 text-sm font-barlow px-4 py-2 flex justify-center items-center gap-1 bg-sky-600 hover:bg-emerald-500 font-grotesk">
                     {
-                        isConnected ? <WalletConnected address={address} icon={walletInfo?.icon} /> : <>
-                            <span>Connect Wallet</span>
-                            <LuLogIn className="text-lg hidden md:flex" />
-                        </>
+                        isConnected ?
+                            (
+                            <button onClick={() => open({ view: 'Account' })}>
+                                     <WalletConnected address={address} icon={walletInfo?.icon} />
+                            </button>
+                            ):
+                            <Link href={"/signup"} className="flex justify-center items-center gap-1">
+                                <span>Connect Wallet</span>
+                                <LuLogIn className="text-lg hidden md:flex" />
+                            </Link>
                     }
                 </button>
 

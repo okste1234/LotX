@@ -12,3 +12,5 @@ export const WalletConnected = ({ address, icon }: { address: string | undefined
         </span>
     )
 }
+
+// onClick={() => open({ view: 'Account' })}

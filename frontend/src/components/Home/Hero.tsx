@@ -15,11 +15,11 @@ const Hero = () => {
                 <h1 className="lg:text-7xl text-4xl font-belanosima font-medium text-gray-200"><span className='bg-gradient-to-l from-sky-400 to-emerald-400 text-transparent bg-clip-text'>Win Big </span>with Just 0.000015 ETH! on<br /> <span className="bg-gradient-to-r from-sky-400 to-emerald-400 text-transparent bg-clip-text">LotX</span></h1>
                 <p className="text-xl font-barlow text-gray-400">Experience the thrill of playing the lottery with our secured app. Check your numbers, claim your prizes, and stay up-to-date with the latest jackpot information.</p>
                 <div className='flex items-center gap-4'>
-                  <Link href="/" className="text-gray-100 text-sm font-barlow px-4 py-2 flex justify-center items-center    gap-1 bg-sky-600 hover:bg-emerald-500">
+                  <Link href="#pots" className="text-gray-100 text-sm font-barlow px-4 py-2 flex justify-center items-center    gap-1 bg-sky-600 hover:bg-emerald-500">
                       Play Now
                   </Link>
                   <Link href="/" className="text-gray-100 text-sm font-barlow px-4 py-2 flex justify-center items-center gap-1 hover:bg-sky-600 bg-emerald-500">
-                      How to Play
+                      Create Pot
                   </Link>
                 </div>
                 

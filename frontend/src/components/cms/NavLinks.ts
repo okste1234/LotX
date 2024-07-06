@@ -11,20 +11,16 @@ export const NavLinks: NavArray = [
     path: "/",
   },
   {
-    name: "About Us",
-    path: "about",
+    name: "How To Play",
+    path: "#how",
   },
   {
-    name: "Services",
-    path: "services",
-  },
-  {
-    name: "FAQs",
-    path: "faqs",
+    name: "Hot Pots",
+    path: "#pots",
   },
   {
     name: "Contact Us",
-    path: "contact",
+    path: "#contact",
   },
 ];
 
@@ -46,14 +42,14 @@ export const OtherLinks: NavArray = [
 export const LegalLinks: NavArray = [
   {
     name: "Privacy Policy",
-    path: "/privacy-policy",
+    path: "/",
   },
   {
     name: "Terms & Conditions",
-    path: "/terms-and-conditions",
+    path: "/",
   },
   {
     name: "Disclaimer",
-    path: "/disclaimer",
+    path: "/",
   },
 ];

@@ -26,15 +26,15 @@ const Footer = () => {
                 <div className="w-full h-auto md:py-16 md:px-10 py-10 px-6 flex md:flex-row flex-col gap-3 justify-between md:items-center items-start border-b border-gray-700">
                     <h1 className="lg:text-3xl md:text-2xl text-xl text-gray-200 font-light font-belanosima">Get Regular Updates</h1>
                     <div className="flex w-full max-w-sm items-center space-x-2">
-                        <Input type="email" className="bg-gray-900 border-gray-600 focus-visible:ring-sky-400 font-barlow text-gray-200" placeholder="Email" />
-                        <Button type="button" className="text-gray-100 text-sm font-barlow px-4 py-2 bg-sky-500 hover:bg-emerald-500 ">Subscribe</Button>
+                        <Input type="email" colorScheme="gray" className="bg-gray-900 border-gray-600 focus-visible:ring-sky-400 font-barlow text-gray-200" placeholder="Email" />
+                        <Button type="button" colorScheme="teal" className="text-gray-100 text-sm font-barlow px-4 py-2 bg-sky-500 hover:bg-emerald-500 ">Subscribe</Button>
                     </div>
                 </div>
 
                 <section className="w-full md:py-16 py-10 px-8 h-auto grid lg:grid-cols-4 md:grid-cols-2 lg:gap-4 gap-8 border-b border-gray-700">
                     <div className="bg-gradient-to-r from-sky-600 to-emerald-500 p-6 rounded-md flex flex-col justify-center gap-3 items-center">
                         <h1 className="md:text-xl text-gray-200 text-center font-belanosima">Join Our Blockchain Community</h1>
-                        <Button type="button" className="text-gray-100 text-sm font-barlow px-4 py-2 bg-gray-900 flex items-center gap-1 ">
+                        <Button type="button" colorScheme="black" className="text-gray-100 text-sm font-barlow px-4 py-2 bg-gray-900 flex items-center gap-1 ">
                             <RxDiscordLogo />
                             Join
                         </Button>
@@ -69,7 +69,7 @@ const Footer = () => {
                 </section>
 
                 <div className="w-full h-full flex px-8 justify-center items-center">
-                    <p className="text-gray-400 font-barlow text-sm">Copyright © {year} StreamFlow. All rights reserved</p>
+                    <p className="text-gray-400 font-barlow text-sm">Copyright © {year} LotX. All rights reserved</p>
                 </div>
             </main>
         </footer>
