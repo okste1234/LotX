@@ -19,8 +19,7 @@ contract Lottery is VRFV2WrapperConsumerBase, ConfirmedOwner {
         bool fulfilled; // whether the request has been successfully fulfilled
         uint256[] randomWords;
     }
-    mapping(uint256 => RequestStatus)
-        public s_requests; /* requestId --> requestStatus */
+    mapping(uint256 => RequestStatus) public s_requests; /* requestId --> requestStatus */
 
     // past requests Id.
     uint256[] public requestIds;
@@ -47,7 +46,6 @@ contract Lottery is VRFV2WrapperConsumerBase, ConfirmedOwner {
     // address WRAPPER - hardcoded for Sepolia
     address wrapperAddress = 0xab18414CD93297B0d12ac29E63Ca20f515b3DB46;
 
-    address public manager;
     uint public lotteryCounter = 0;
     uint public constant entryFee = 0.000015 ether;
 
@@ -55,19 +53,111 @@ contract Lottery is VRFV2WrapperConsumerBase, ConfirmedOwner {
         uint id;
         address manager;
         address[] players;
-        address[] winners;
+        Winner[] winners;
         uint endTime;
         uint balance;
         bool isActive;
+    }
+
+    struct Winner{
+        address winner;
+        uint256 amount;
     }
 
     mapping(uint => LotteryInfo) public lotteries;
 
     constructor() VRFV2WrapperConsumerBase(linkAddress, wrapperAddress) ConfirmedOwner(msg.sender) {}
 
-    function requestRandomWords(uint lotteryId)
+    modifier restricted(uint lotteryId) {
+        LotteryInfo storage lottery = lotteries[lotteryId];
+        require(msg.sender == lottery.manager, "Only the manager can call this function");
+        _;
+    }
+
+    
+    function createLottery(uint durationInMinutes) public {
+        lotteryCounter++;
+        LotteryInfo storage newLottery = lotteries[lotteryCounter];
+        newLottery.id = lotteryCounter;
+        newLottery.manager = msg.sender;
+        newLottery.endTime = block.timestamp + (durationInMinutes * 1 minutes);
+        newLottery.isActive = true;
+    }
+
+    function enterLottery(uint lotteryId) public payable {
+        require(lotteries[lotteryId].isActive, "Lottery is not active");
+        require(block.timestamp < lotteries[lotteryId].endTime, "Lottery has ended");
+        require(msg.value == entryFee, "Incorrect entry fee");
+
+        lotteries[lotteryId].players.push(msg.sender);
+        lotteries[lotteryId].balance += msg.value;
+    }
+
+    function pickWinners(uint lotteryId) public restricted(lotteryId) {
+        require(lotteries[lotteryId].isActive, "Lottery is not active");
+        require(block.timestamp >= lotteries[lotteryId].endTime, "Lottery duration has not ended");
+
+        require(lastRequestId != 0, "requestRandomWords not called yet");
+        require(block.timestamp > lastRequestTime + 40, "Wait a bit longer for fulfillment");
+        ( , bool fulfilled, ) = getRequestStatus(lastRequestId);
+        require(fulfilled, "Request not yet fulfilled");
+
+        uint numWinners = getNumWords(lotteryId);
+        LotteryInfo storage lottery = lotteries[lotteryId];
+        uint256 totalSlots = lottery.players.length;
+        uint256[] memory latestRandomWords = s_requests[lastRequestId].randomWords;
+        require(latestRandomWords.length == numWords, "Random words not available");
+        
+        for (uint i = 0; i < numWinners; i++) {
+            uint256 winnerIndex = latestRandomWords[i] % totalSlots;
+            // Ensure winnerIndex is within the bounds of the players array
+            require(winnerIndex < lotteries[lotteryId].players.length, "Index out of bounds");
+            lottery.winners[i].winner = lotteries[lotteryId].players[winnerIndex]; // Store winners for distribution
+
+        }
+
+        distributePrizes(lotteryId);
+        lotteries[lotteryId].isActive = false; // Mark the lottery as inactive
+    }
+
+   function distributePrizes(uint lotteryId) private {
+        uint totalPrize = lotteries[lotteryId].balance;
+        uint numWinners = lotteries[lotteryId].winners.length;
+
+        for (uint i = 0; i < numWinners; i++) {
+            uint prize = (totalPrize * (numWinners - i)) / numWinners;
+            lotteries[lotteryId].winners[i].amount = prize;
+            payable(lotteries[lotteryId].winners[i].winner).transfer(prize);
+            
+        }
+    }
+
+   
+    function getPlayers(uint lotteryId) public view returns (address[] memory) {
+        return lotteries[lotteryId].players;
+    }
+
+    function getWinners(uint lotteryId) public view returns (Winner[] memory) {
+        return lotteries[lotteryId].winners;
+    }
+
+    function getLotteryInfo(uint lotteryId) public view returns (uint, address, address[] memory, Winner[] memory, uint, uint, bool) {
+        LotteryInfo storage lottery = lotteries[lotteryId];
+        return (lottery.id, lottery.manager, lottery.players, lottery.winners, lottery.endTime, lottery.balance, lottery.isActive);
+    }
+
+    function getNumWords(uint lotteryId) public view returns(uint32 _numWords) {
+        uint numPlayers = lotteries[lotteryId].players.length;
+        // Check if numberOfWinners.length is within the uint32 range
+        require(numPlayers <= type(uint32).max, "Number of winners exceeds uint32 max value");
+        _numWords = uint32(((numPlayers * 50) / 100) + 1);
+    }
+
+
+
+    function triggerWinnerSelection(uint lotteryId)
         external
-        onlyOwner
+        restricted(lotteryId)
         returns (uint256 requestId)
     {
         numWords = getNumWords(lotteryId);
@@ -125,86 +215,4 @@ contract Lottery is VRFV2WrapperConsumerBase, ConfirmedOwner {
         );
     }
 
-    function createLottery(uint durationInMinutes) public {
-        lotteryCounter++;
-        LotteryInfo storage newLottery = lotteries[lotteryCounter];
-        newLottery.id = lotteryCounter;
-        newLottery.manager = msg.sender;
-        newLottery.endTime = block.timestamp + (durationInMinutes * 1 minutes);
-        newLottery.isActive = true;
-    }
-
-    function enter(uint lotteryId) public payable {
-        require(lotteries[lotteryId].isActive, "Lottery is not active");
-        require(block.timestamp < lotteries[lotteryId].endTime, "Lottery has ended");
-        require(msg.value == entryFee, "Incorrect entry fee");
-
-        lotteries[lotteryId].players.push(msg.sender);
-        lotteries[lotteryId].balance += msg.value;
-    }
-
-    function pickWinners(uint lotteryId) public restricted(lotteryId) {
-        require(lotteries[lotteryId].isActive, "Lottery is not active");
-        require(block.timestamp >= lotteries[lotteryId].endTime, "Lottery duration has not ended");
-
-        require(lastRequestId != 0, "requestRandomWords not called yet");
-        require(block.timestamp > lastRequestTime + 40, "Wait a bit longer for fulfillment");
-        ( , bool fulfilled, ) = getRequestStatus(lastRequestId);
-        require(fulfilled, "Request not yet fulfilled");
-
-        uint numWinners = getNumWords(lotteryId);
-        LotteryInfo storage lottery = lotteries[lotteryId];
-        uint256 totalSlots = lottery.players.length;
-        address[] memory selectedWinners = new address[](numWords);
-        uint256[] memory latestRandomWords = s_requests[lastRequestId].randomWords;
-        require(latestRandomWords.length == numWords, "Random words not available");
-        
-        for (uint i = 0; i < numWinners; i++) {
-            uint256 winnerIndex = latestRandomWords[i] % totalSlots;
-            // Ensure winnerIndex is within the bounds of the players array
-            require(winnerIndex < lotteries[lotteryId].players.length, "Index out of bounds");
-            selectedWinners[i] = lotteries[lotteryId].players[winnerIndex];
-        }
-        lottery.winners = selectedWinners; // Store winners for distribution
-
-        distributePrizes(lotteryId);
-        lotteries[lotteryId].isActive = false; // Mark the lottery as inactive
-    }
-
-    function distributePrizes(uint lotteryId) private {
-        uint totalPrize = lotteries[lotteryId].balance;
-        uint numWinners = lotteries[lotteryId].winners.length;
-
-        for (uint i = 0; i < numWinners; i++) {
-            uint prize = (totalPrize * (numWinners - i)) / numWinners;
-            payable(lotteries[lotteryId].winners[i]).transfer(prize);
-            numWinners--;
-        }
-    }
-
-    modifier restricted(uint lotteryId) {
-        LotteryInfo storage lottery = lotteries[lotteryId];
-        require(msg.sender == lottery.manager, "Only the manager can call this function");
-        _;
-    }
-
-    function getPlayers(uint lotteryId) public view returns (address[] memory) {
-        return lotteries[lotteryId].players;
-    }
-
-    function getWinners(uint lotteryId) public view returns (address[] memory) {
-        return lotteries[lotteryId].winners;
-    }
-
-    function getLotteryInfo(uint lotteryId) public view returns (uint, address, address[] memory, address[] memory, uint, uint, bool) {
-        LotteryInfo storage lottery = lotteries[lotteryId];
-        return (lottery.id, lottery.manager, lottery.players, lottery.winners, lottery.endTime, lottery.balance, lottery.isActive);
-    }
-
-    function getNumWords(uint lotteryId) public view returns(uint32 _numWords) {
-        uint numPlayers = lotteries[lotteryId].players.length;
-        // Check if numberOfWinners.length is within the uint32 range
-        require(numPlayers <= type(uint32).max, "Number of winners exceeds uint32 max value");
-        _numWords = uint32(((numPlayers * 10) / 100) + 1);
-    }
 }
