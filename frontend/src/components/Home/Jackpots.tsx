@@ -53,7 +53,7 @@ const Jackpots = () => {
                             </div>
                             <h3 className="text-xl text-gray-200 font-belanosima">{caption}</h3>
                             <p className="text-gray-400 font-barlow">{text}</p>
-                            {!status? 
+                            {status ?
                                 
                                 <Link href={"/pots"}>
                                     <Button>
@@ -62,9 +62,12 @@ const Jackpots = () => {
                                 </Link>
                                
                                 :
-                                <Button colorScheme='teal' variant='outline' disabled cursor={"none"}>
-                                    Ended
-                                </Button>}
+                                <Link href={"/pots"}>
+                                    <Button colorScheme='teal' variant='outline' disabled cursor={"none"}>
+                                        Ended
+                                    </Button>
+                                </Link>
+                            }
                         </div>
                     ))
                 }

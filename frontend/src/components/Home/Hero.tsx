@@ -7,6 +7,7 @@ import { FaEthereum } from 'react-icons/fa6'
 import { SiEthereum } from 'react-icons/si'
 import { RiHandCoinFill } from 'react-icons/ri'
 import { BsCashCoin } from 'react-icons/bs'
+import ModalHandle from './Modal'
 
 const Hero = () => {
   return (
@@ -18,9 +19,9 @@ const Hero = () => {
                   <Link href="#pots" className="text-gray-100 text-sm font-barlow px-4 py-2 flex justify-center items-center    gap-1 bg-sky-600 hover:bg-emerald-500">
                       Play Now
                   </Link>
-                  <Link href="/" className="text-gray-100 text-sm font-barlow px-4 py-2 flex justify-center items-center gap-1 hover:bg-sky-600 bg-emerald-500">
-                      Create Pot
-                  </Link>
+            
+                  <ModalHandle />
+                  
                 </div>
                 
             </div>

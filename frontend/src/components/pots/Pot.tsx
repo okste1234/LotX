@@ -1,3 +1,4 @@
+"use client"
 import {
   Table,
   Thead,
@@ -9,8 +10,13 @@ import {
   Button,
 } from '@chakra-ui/react'
 import { BsCoin } from 'react-icons/bs'
+import Countdown from 'react-countdown';
+import { useState } from 'react';
+import { GiLaurelsTrophy } from 'react-icons/gi';
 
 export default function Component() {
+    const [manager, setManager] = useState(true)
+
   return (
     <div className="w-full max-w-6xl mx-auto py-12 md:py-16 lg:py-20 text-gray-200">
       <div className="px-4 md:px-6 lg:px-8">
@@ -23,9 +29,19 @@ export default function Component() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 lg:gap-12 items-center justify-center">
           <div>
             <h2 className="text-2xl font-bold mb-4 text-center">Purchase Ticket</h2>
+            <div className="border-gray-800 bg-gray-800 border-[4px] rounded-[2.5rem] mb-2 w-fit">
+                <div className="rounded-[2rem] border-2 border-gray-950">
+                    <Countdown date={Date.now() + 10000} className='p-4' />
+                </div>
+            </div>
             <Button type="submit" className="w-full" rightIcon={<BsCoin className='text-orange-600 text-2xl font-bold' />}>
               Purchase Tickets
             </Button>
+            {manager && 
+                 <Button type="submit" className="w-full" marginTop={"16px"} rightIcon={<GiLaurelsTrophy className='text-emerald-300 text-2xl font-bold' />}>
+                Annouce Winner(s)
+            </Button>   
+            }
           </div>
           <div>
             <h2 className="text-2xl font-bold mb-4">Current Participants</h2>
@@ -77,7 +93,7 @@ export default function Component() {
                 <Tr>
                   <Th>Winners</Th>
                   <Th>Address</Th>
-                  <Th>Prize</Th>
+                  <Th>Prizes</Th>
                 </Tr>
               </Thead>
               <Tbody>
