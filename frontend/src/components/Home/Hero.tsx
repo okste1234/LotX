@@ -1,16 +1,38 @@
-import React from 'react'
-import MaxWrapper from '../shared/MaxWrapper'
+"use client"
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Box } from '@chakra-ui/react'
 import { MdOutlineSecurity } from 'react-icons/md'
 import { FaEthereum } from 'react-icons/fa6'
 import { SiEthereum } from 'react-icons/si'
 import { RiHandCoinFill } from 'react-icons/ri'
 import { BsCashCoin } from 'react-icons/bs'
 import ModalHandle from './Modal'
+import useLotteryInfo from '@/hooks/useLotteryInfo'
 
 const Hero = () => {
-  return (
+    const { listing: lotteries, loading, error } = useLotteryInfo();
+    const [roundOn, setRoundOn] = useState<boolean>(false)
+    const [currentRoundTime, setCurrentRoundTime] = useState<number | null>(null);
+
+    useEffect(() => {
+        if (lotteries && lotteries.length > 0) {
+            const lastLottery = lotteries[lotteries.length - 1];
+            setCurrentRoundTime(lastLottery.endTime * 1000);
+        }
+    }, [lotteries]);
+
+    useEffect(() => {
+        if (currentRoundTime) {
+            const currentTime = Date.now();
+            // console.log("TIMEEE", currentRoundTime, currentTime);
+            
+            if (currentRoundTime >= currentTime  ) {
+                setRoundOn(true);
+            }
+        }
+    }, [currentRoundTime]);
+
+    return (
       <main className="w-full overflow-hidden lg:h-[80vh] md:h-[50vh] h-screen flex items-center md:flex-row flex-col">
             <div className="flex-1 h-1/2 md:h-full flex order-2 md:order-1 flex-col gap-4 md:gap-6 items-start justify-center lg:px-12 md:px-6 px-4">
                 <h1 className="lg:text-7xl text-4xl font-belanosima font-medium text-gray-200"><span className='bg-gradient-to-l from-sky-400 to-emerald-400 text-transparent bg-clip-text'>Win Big </span>with Just 0.000015 ETH! on<br /> <span className="bg-gradient-to-r from-sky-400 to-emerald-400 text-transparent bg-clip-text">LotX</span></h1>
@@ -19,9 +41,14 @@ const Hero = () => {
                   <Link href="#pots" className="text-gray-100 text-sm font-barlow px-4 py-2 flex justify-center items-center    gap-1 bg-sky-600 hover:bg-emerald-500">
                       Play Now
                   </Link>
-            
-                  <ModalHandle />
-                  
+                    {
+                        !roundOn ?
+                         <ModalHandle />
+                        :
+                        <Link href={`/pots/${lotteries.length}`} className="text-gray-100 text-sm font-barlow px-4 py-2 flex justify-center items-center    gap-1 bg-sky-600 hover:bg-emerald-500">
+                            Join Ongoing Round    
+                        </Link>
+                   }      
                 </div>
                 
             </div>

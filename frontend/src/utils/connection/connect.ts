@@ -14,9 +14,9 @@ const sepolia = {
 
 
 const metadata = {
-    name: "UmmahTech",
-    description: "A decentralized learning application onChain tailored to give seamless learning and development for individuals. A place where students meet mentors, and opportunities",
-    url: "", 
+    name: "LotX",
+    description: "Experience the thrill of playing the lottery with our secured app. Check your numbers, claim your prizes, and stay up-to-date with the latest jackpot information.",
+    url: "https://lot-x.vercel.app/", 
     icons: ["https://avatars.mywebsite.com/"],
 };
 

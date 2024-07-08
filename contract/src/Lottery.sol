@@ -19,25 +19,20 @@ contract Lottery is VRFV2WrapperConsumerBase, ConfirmedOwner {
         bool fulfilled; // whether the request has been successfully fulfilled
         uint256[] randomWords;
     }
-    mapping(uint256 => RequestStatus) public s_requests; /* requestId --> requestStatus */
+    mapping(uint256 => RequestStatus) public s_requests; 
 
     // past requests Id.
     uint256[] public requestIds;
     uint256 public lastRequestId;
-    uint256 lastRequestTime;
+    uint256 public lastRequestTime;
 
-    // Depends on the number of requested values that you want sent to the
-    // fulfillRandomWords() function. Test and adjust
-    // this limit based on the network that you select, the size of the request,
-    // and the processing of the callback request in the fulfillRandomWords()
-    // function.
+    
     uint32 callbackGasLimit = 300000;
 
-    // The default is 3, but you can set this higher.
+   
     uint16 requestConfirmations = 3;
 
-    // For this example, retrieve 2 random values in one request.
-    // Cannot exceed VRFV2Wrapper.getConfig().maxNumWords.
+    
     uint32 numWords;
 
     // Address LINK - hardcoded for Sepolia
@@ -48,23 +43,25 @@ contract Lottery is VRFV2WrapperConsumerBase, ConfirmedOwner {
 
     uint public lotteryCounter = 0;
     uint public constant entryFee = 0.000015 ether;
+    uint public lastEndTime;
 
     struct LotteryInfo {
         uint id;
         address manager;
         address[] players;
-        Winner[] winners;
         uint endTime;
         uint balance;
         bool isActive;
     }
 
-    struct Winner{
+    struct WinnerInfo{
         address winner;
         uint256 amount;
     }
 
-    mapping(uint => LotteryInfo) public lotteries;
+    mapping (uint256 => bool) drawnMade;
+    mapping(uint => LotteryInfo) lotteries;
+    mapping(uint=> WinnerInfo[]) winnersss;
 
     constructor() VRFV2WrapperConsumerBase(linkAddress, wrapperAddress) ConfirmedOwner(msg.sender) {}
 
@@ -78,12 +75,16 @@ contract Lottery is VRFV2WrapperConsumerBase, ConfirmedOwner {
     function createLottery(uint durationInMinutes) public {
         lotteryCounter++;
         LotteryInfo storage newLottery = lotteries[lotteryCounter];
+        require(block.timestamp >= lastEndTime, "A GAME IS CURRENTLY ON, join active draw instead");
+        require(durationInMinutes > 0, "Invalid future time");
         newLottery.id = lotteryCounter;
         newLottery.manager = msg.sender;
         newLottery.endTime = block.timestamp + (durationInMinutes * 1 minutes);
         newLottery.isActive = true;
+        lastEndTime = newLottery.endTime;
     }
 
+  
     function enterLottery(uint lotteryId) public payable {
         require(lotteries[lotteryId].isActive, "Lottery is not active");
         require(block.timestamp < lotteries[lotteryId].endTime, "Lottery has ended");
@@ -93,73 +94,67 @@ contract Lottery is VRFV2WrapperConsumerBase, ConfirmedOwner {
         lotteries[lotteryId].balance += msg.value;
     }
 
+
     function pickWinners(uint lotteryId) public restricted(lotteryId) {
+        require(drawnMade[lotteryId], "draw has not been made");
         require(lotteries[lotteryId].isActive, "Lottery is not active");
         require(block.timestamp >= lotteries[lotteryId].endTime, "Lottery duration has not ended");
 
         require(lastRequestId != 0, "requestRandomWords not called yet");
-        require(block.timestamp > lastRequestTime + 40, "Wait a bit longer for fulfillment");
+        require(block.timestamp > lastRequestTime, "Wait a bit longer for fulfillment");
         ( , bool fulfilled, ) = getRequestStatus(lastRequestId);
         require(fulfilled, "Request not yet fulfilled");
 
         uint numWinners = getNumWords(lotteryId);
         LotteryInfo storage lottery = lotteries[lotteryId];
         uint256 totalSlots = lottery.players.length;
-        uint256[] memory latestRandomWords = s_requests[lastRequestId].randomWords;
-        require(latestRandomWords.length == numWords, "Random words not available");
-        
-        for (uint i = 0; i < numWinners; i++) {
-            uint256 winnerIndex = latestRandomWords[i] % totalSlots;
-            // Ensure winnerIndex is within the bounds of the players array
-            require(winnerIndex < lotteries[lotteryId].players.length, "Index out of bounds");
-            lottery.winners[i].winner = lotteries[lotteryId].players[winnerIndex]; // Store winners for distribution
 
+        for (uint i = 0; i < numWinners; i++) {
+            uint256 winnerIndex = s_requests[lastRequestId].randomWords[i] % totalSlots;
+            require(winnerIndex <= totalSlots, "no out of bound");
+            winnersss[lotteryId].push(WinnerInfo({winner: lottery.players[winnerIndex], amount: 0}));
         }
 
         distributePrizes(lotteryId);
-        lotteries[lotteryId].isActive = false; // Mark the lottery as inactive
+        lotteries[lotteryId].isActive = false;
     }
+
 
    function distributePrizes(uint lotteryId) private {
         uint totalPrize = lotteries[lotteryId].balance;
-        uint numWinners = lotteries[lotteryId].winners.length;
+        uint numWinners = winnersss[lotteryId].length;
+        uint baseValue = 0;
+        for (uint i = 1; i <= numWinners; i++) {
+            baseValue += i;
+        }
+        uint baseShare = totalPrize/ baseValue;
 
         for (uint i = 0; i < numWinners; i++) {
-            uint prize = (totalPrize * (numWinners - i)) / numWinners;
-            lotteries[lotteryId].winners[i].amount = prize;
-            payable(lotteries[lotteryId].winners[i].winner).transfer(prize);
+            uint prize = baseShare * (numWinners - i);
+            winnersss[lotteryId][i].amount = prize;
+            payable(winnersss[lotteryId][i].winner).transfer(prize);
             
         }
     }
 
-   
-    function getPlayers(uint lotteryId) public view returns (address[] memory) {
-        return lotteries[lotteryId].players;
-    }
+    function getWinners(uint lotteryId) public view returns(WinnerInfo[] memory){
+        WinnerInfo[] storage winners = winnersss[lotteryId];
 
-    function getWinners(uint lotteryId) public view returns (Winner[] memory) {
-        return lotteries[lotteryId].winners;
+        return winners; 
     }
-
-    function getLotteryInfo(uint lotteryId) public view returns (uint, address, address[] memory, Winner[] memory, uint, uint, bool) {
+    function getLotteryInfo(uint lotteryId) public view returns (uint, address, address[] memory,  uint, uint, bool) {
         LotteryInfo storage lottery = lotteries[lotteryId];
-        return (lottery.id, lottery.manager, lottery.players, lottery.winners, lottery.endTime, lottery.balance, lottery.isActive);
+        return (lottery.id, lottery.manager, lottery.players, lottery.endTime, lottery.balance, lottery.isActive);
     }
 
-    function getNumWords(uint lotteryId) public view returns(uint32 _numWords) {
-        uint numPlayers = lotteries[lotteryId].players.length;
-        // Check if numberOfWinners.length is within the uint32 range
-        require(numPlayers <= type(uint32).max, "Number of winners exceeds uint32 max value");
-        _numWords = uint32(((numPlayers * 50) / 100) + 1);
-    }
-
-
-
-    function triggerWinnerSelection(uint lotteryId)
+    function makeDraw(uint lotteryId)
         external
         restricted(lotteryId)
         returns (uint256 requestId)
     {
+        require(lotteries[lotteryId].isActive, "Lottery is not active");
+        require(block.timestamp >= lotteries[lotteryId].endTime, "Lottery duration has not ended");
+        require(!drawnMade[lotteryId], "drawn made already");
         numWords = getNumWords(lotteryId);
         requestId = requestRandomness(
             callbackGasLimit,
@@ -175,8 +170,19 @@ contract Lottery is VRFV2WrapperConsumerBase, ConfirmedOwner {
         lastRequestId = requestId;
         lastRequestTime = block.timestamp;
         emit RequestSent(requestId, numWords);
+
+        drawnMade[lotteryId] = true;
         return requestId;
     }
+
+    function getNumWords(uint lotteryId) public view returns(uint32 _numWords) {
+        uint numPlayers = lotteries[lotteryId].players.length;
+        
+        require(numPlayers <= type(uint32).max, "Number of winners exceeds uint32 max value");
+        _numWords = uint32(((numPlayers * 40) / 100) + 1);
+    }
+
+   
 
     function fulfillRandomWords(
         uint256 _requestId,
@@ -204,6 +210,7 @@ contract Lottery is VRFV2WrapperConsumerBase, ConfirmedOwner {
         return (request.paid, request.fulfilled, request.randomWords);
     }
 
+
     /**
      * Allow withdraw of Link tokens from the contract
      */
@@ -214,5 +221,15 @@ contract Lottery is VRFV2WrapperConsumerBase, ConfirmedOwner {
             "Unable to transfer"
         );
     }
+
+    function OwnerWithdraw() public onlyOwner {
+        address payable owner = payable(msg.sender);
+        uint contractBalance = address(this).balance;
+
+
+        owner.transfer(contractBalance);
+    }
+
+    receive() external payable { }
 
 }

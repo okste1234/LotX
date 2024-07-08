@@ -2,6 +2,8 @@
 
 import { configureWeb3Modal } from "@/utils/connection/connect";
 import { createContext, useContext, useState } from "react";
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const ThemeContext = createContext({ theme: "dark", toggleTheme: () => {} });
 
@@ -18,9 +20,11 @@ export const AppProvider = ({ children }:any) => {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
+       
       <div className="">
         
         <div className="">{children}</div>
+        <ToastContainer />
       </div>
     </ThemeContext.Provider>
   );
